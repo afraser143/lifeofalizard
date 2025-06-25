@@ -5,77 +5,214 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bearded Dragon Adventure</title>
     <style>
-        /* Previous styles remain the same, adding new ones: */
-        
-        .game-container {
-            position: relative;
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #2c1810;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Arial', sans-serif;
         }
 
-        #bgMusic {
-            position: fixed;
+        .game-wrapper {
+            position: relative;
+            width: 800px;
+            height: 400px;
+        }
+
+        #gameCanvas {
+            border: 4px solid #4A90E2;
+            border-radius: 8px;
+            background: #87CEEB;
+        }
+
+        #gameStats {
+            position: absolute;
             top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
+
+        .power-indicator {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
+            border-radius: 50%;
+            border: 2px solid #333;
+            transition: all 0.3s ease;
+        }
+
+        #firePower { 
+            background: linear-gradient(45deg, #FF6B6B, #FFB347);
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+        }
+        #waterPower { 
+            background: linear-gradient(45deg, #4DACFF, #45B7D1);
+            box-shadow: 0 0 10px rgba(77, 172, 255, 0.5);
+        }
+        #earthPower { 
+            background: linear-gradient(45deg, #77DD77, #3CB371);
+            box-shadow: 0 0 10px rgba(119, 221, 119, 0.5);
+        }
+        #superPower { 
+            background: linear-gradient(45deg, #FFD93D, #FF8C00);
+            box-shadow: 0 0 10px rgba(255, 217, 61, 0.5);
+        }
+
+        .power-active {
+            animation: powerPulse 1.5s infinite;
+            transform: scale(1.2);
+        }
+
+        @keyframes powerPulse {
+            0% { transform: scale(1.2); }
+            50% { transform: scale(1.4); }
+            100% { transform: scale(1.2); }
+        }
+
+        #startScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        #startButton {
+            padding: 15px 40px;
+            font-size: 1.5em;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin: 20px 0;
+        }
+
+        #startButton:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        #controls {
+            position: absolute;
+            bottom: 20px;
             right: 20px;
-            background: rgba(255,255,255,0.9);
+            background: rgba(255, 255, 255, 0.9);
             padding: 10px;
             border-radius: 8px;
             display: flex;
             align-items: center;
             gap: 10px;
+            z-index: 100;
         }
 
         #musicToggle {
-            cursor: pointer;
-            padding: 5px 10px;
             background: #4CAF50;
             color: white;
             border: none;
+            padding: 5px 15px;
             border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
         }
 
-        /* Add loading screen */
+        #musicToggle:hover {
+            background: #45a049;
+        }
+
+        #volumeSlider {
+            width: 100px;
+        }
+
+        .game-title {
+            color: white;
+            font-size: 3.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            text-align: center;
+            font-family: 'Arial Black', sans-serif;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .instructions {
+            color: white;
+            margin-top: 20px;
+            font-size: 1.2em;
+            text-align: center;
+            line-height: 1.6;
+        }
+
         #loadingScreen {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.9);
+            background: #2c1810;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: white;
-            font-size: 24px;
             z-index: 2000;
         }
 
-        .power-active {
-            animation: powerPulse 1s infinite;
+        .loading-text {
+            color: white;
+            font-size: 24px;
+            text-align: center;
         }
 
-        @keyframes powerPulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <div id="loadingScreen">Loading game assets...</div>
-    
+    <div id="loadingScreen">
+        <div>
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Loading game assets...</div>
+        </div>
+    </div>
+
     <div id="startScreen">
-        <h1 style="color: white; font-size: 3em; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
-            Bearded Dragon Adventure
-        </h1>
+        <h1 class="game-title">Bearded Dragon Adventure</h1>
         <button id="startButton">Start Game</button>
-        <p style="color: white; margin-top: 20px;">Use arrow keys to move</p>
+        <div class="instructions">
+            Use arrow keys to move<br>
+            Collect power bugs and avoid the evil worm!
+        </div>
     </div>
 
-    <div id="bgMusic">
-        <button id="musicToggle">🔊 Music</button>
-        <input type="range" id="volumeSlider" min="0" max="100" value="50">
-    </div>
-
-    <div class="game-container">
+    <div class="game-wrapper">
         <div id="gameStats">
             Score: <span id="score">0</span>
             <br>
@@ -85,138 +222,260 @@
             <div class="power-indicator" id="earthPower"></div>
             <div class="power-indicator" id="superPower"></div>
         </div>
+        
         <canvas id="gameCanvas" width="800" height="400"></canvas>
+
+        <div id="controls">
+            <button id="musicToggle">🔊 Music</button>
+            <input type="range" id="volumeSlider" min="0" max="100" value="50">
+        </div>
     </div>
 
-    <!-- Add audio elements -->
+    <!-- Audio elements -->
     <audio id="backgroundMusic" loop>
-        <source src="https://example.com/path-to-desert-theme.mp3" type="audio/mp3">
+        <source src="https://freesound.org/people/joshuaempyre/sounds/251461/download/251461__joshuaempyre__desert-eagle-sound.mp3" type="audio/mpeg">
     </audio>
-    <audio id="powerupSound" src="https://example.com/path-to-powerup-sound.mp3"></audio>
-    <audio id="hitSound" src="https://example.com/path-to-hit-sound.mp3"></audio>
+    <audio id="powerupSound" src="https://freesound.org/people/GameAudio/sounds/220173/download/220173__gameaudio__flourish-spacey-2.mp3"></audio>
+    <audio id="hitSound" src="https://freesound.org/people/LittleRobotSoundFactory/sounds/270332/download/270332__littlerobotsoundfactory__hit-02.mp3"></audio>
+<script>
+    // Get DOM elements
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const scoreElement = document.getElementById('score');
+    const startScreen = document.getElementById('startScreen');
+    const startButton = document.getElementById('startButton');
+    const loadingScreen = document.getElementById('loadingScreen');
 
-    <script>
-        // Previous JavaScript remains, adding new features:
+    // Audio setup
+    const bgMusic = document.getElementById('backgroundMusic');
+    const powerupSound = document.getElementById('powerupSound');
+    const hitSound = document.getElementById('hitSound');
+    const musicToggle = document.getElementById('musicToggle');
+    const volumeSlider = document.getElementById('volumeSlider');
 
-        // Load images
-        const images = {
-            background: new Image(),
-            dragon: new Image(),
-            worm: new Image(),
-            fireBug: new Image(),
-            waterBug: new Image(),
-            earthBug: new Image(),
-            superBug: new Image()
+    // Image loading
+    const images = {
+        background: new Image(),
+        dragon: new Image(),
+        worm: new Image(),
+        fireBug: new Image(),
+        waterBug: new Image(),
+        earthBug: new Image(),
+        superBug: new Image()
+    };
+
+    // Set image sources
+    images.background.src = 'https://opengameart.org/sites/default/files/desert-background.png';
+    images.dragon.src = 'https://opengameart.org/sites/default/files/styles/medium/public/dragon_idle.png';
+    images.worm.src = 'https://opengameart.org/sites/default/files/styles/medium/public/worm_sprite.png';
+    images.fireBug.src = 'https://opengameart.org/sites/default/files/styles/medium/public/fire_bug.png';
+    images.waterBug.src = 'https://opengameart.org/sites/default/files/styles/medium/public/water_bug.png';
+    images.earthBug.src = 'https://opengameart.org/sites/default/files/styles/medium/public/earth_bug.png';
+    images.superBug.src = 'https://opengameart.org/sites/default/files/styles/medium/public/super_bug.png';
+
+    // Game state
+    let gameStarted = false;
+    let score = 0;
+    let backgroundX = 0;
+    let powers = {
+        fire: false,
+        water: false,
+        earth: false,
+        super: false
+    };
+
+    // Player (Bearded Dragon)
+    const player = {
+        x: 50,
+        y: canvas.height / 2,
+        width: 60,
+        height: 40,
+        speed: 5,
+        frameX: 0,
+        frameY: 0,
+        frameCount: 4,
+        animationSpeed: 5,
+        animationCounter: 0
+    };
+
+    // Game objects arrays
+    let bugs = [];
+    let enemies = [];
+
+    // Controls
+    const keys = {};
+    document.addEventListener('keydown', (e) => keys[e.key] = true);
+    document.addEventListener('keyup', (e) => keys[e.key] = false);
+
+    // Asset loading tracker
+    let loadedAssets = 0;
+    const totalAssets = Object.keys(images).length;
+
+    function assetLoaded() {
+        loadedAssets++;
+        if (loadedAssets >= totalAssets) {
+            loadingScreen.style.display = 'none';
+        }
+    }
+
+    // Load all images
+    Object.values(images).forEach(img => {
+        img.onload = assetLoaded;
+        img.onerror = () => {
+            console.error('Error loading image:', img.src);
+            assetLoaded();
         };
+    });
 
-        // Image sources (replace with actual URLs)
-        images.background.src = 'https://example.com/desert-background.png';
-        images.dragon.src = 'https://example.com/bearded-dragon.png';
-        images.worm.src = 'https://example.com/worm.png';
-        images.fireBug.src = 'https://example.com/fire-bug.png';
-        images.waterBug.src = 'https://example.com/water-bug.png';
-        images.earthBug.src = 'https://example.com/earth-bug.png';
-        images.superBug.src = 'https://example.com/super-bug.png';
+    // Audio controls
+    musicToggle.addEventListener('click', () => {
+        if (bgMusic.paused) {
+            bgMusic.play();
+            musicToggle.textContent = '🔊 Music';
+        } else {
+            bgMusic.pause();
+            musicToggle.textContent = '🔈 Music';
+        }
+    });
 
-        // Audio setup
-        const bgMusic = document.getElementById('backgroundMusic');
-        const musicToggle = document.getElementById('musicToggle');
-        const volumeSlider = document.getElementById('volumeSlider');
-        const powerupSound = document.getElementById('powerupSound');
-        const hitSound = document.getElementById('hitSound');
+    volumeSlider.addEventListener('input', (e) => {
+        const volume = e.target.value / 100;
+        bgMusic.volume = volume;
+        powerupSound.volume = volume;
+        hitSound.volume = volume;
+    });
 
-        // Music controls
-        musicToggle.addEventListener('click', () => {
-            if (bgMusic.paused) {
-                bgMusic.play();
-                musicToggle.textContent = '🔊 Music';
-            } else {
-                bgMusic.pause();
-                musicToggle.textContent = '🔈 Music';
+    function updatePlayer() {
+        if (keys['ArrowUp'] && player.y > 0) player.y -= player.speed;
+        if (keys['ArrowDown'] && player.y < canvas.height - player.height) player.y += player.speed;
+        if (keys['ArrowLeft'] && player.x > 0) player.x -= player.speed;
+        if (keys['ArrowRight'] && player.x < canvas.width - player.width) player.x += player.speed;
+
+        // Update animation frame
+        player.animationCounter++;
+        if (player.animationCounter >= player.animationSpeed) {
+            player.frameX = (player.frameX + 1) % player.frameCount;
+            player.animationCounter = 0;
+        }
+    }
+
+    function spawnBug() {
+        const types = ['fire', 'water', 'earth', 'super'];
+        const type = types[Math.floor(Math.random() * types.length)];
+        bugs.push({
+            x: canvas.width,
+            y: Math.random() * (canvas.height - 30),
+            width: 30,
+            height: 30,
+            type: type,
+            frameX: 0,
+            frameCount: 4,
+            animationSpeed: 8,
+            animationCounter: 0
+        });
+    }
+
+    function spawnEnemy() {
+        enemies.push({
+            x: canvas.width,
+            y: Math.random() * (canvas.height - 40),
+            width: 40,
+            height: 30,
+            speed: 3,
+            frameX: 0,
+            frameCount: 4,
+            animationSpeed: 6,
+            animationCounter: 0
+        });
+    }
+
+    function updateGame() {
+        // Scroll background
+        backgroundX = (backgroundX - 1) % canvas.width;
+
+        // Update bugs
+        bugs = bugs.filter(bug => {
+            bug.x -= 2;
+            bug.animationCounter++;
+            if (bug.animationCounter >= bug.animationSpeed) {
+                bug.frameX = (bug.frameX + 1) % bug.frameCount;
+                bug.animationCounter = 0;
+            }
+            return bug.x > -bug.width;
+        });
+
+        // Update enemies
+        enemies = enemies.filter(enemy => {
+            enemy.x -= enemy.speed;
+            enemy.animationCounter++;
+            if (enemy.animationCounter >= enemy.animationSpeed) {
+                enemy.frameX = (enemy.frameX + 1) % enemy.frameCount;
+                enemy.animationCounter = 0;
+            }
+            return enemy.x > -enemy.width;
+        });
+
+        // Spawn new objects
+        if (Math.random() < 0.02) spawnBug();
+        if (Math.random() < 0.01) spawnEnemy();
+
+        // Check collisions
+        checkCollisions();
+    }
+
+        function checkCollisions() {
+        // Check bug collisions
+        bugs.forEach((bug, index) => {
+            if (isColliding(player, bug)) {
+                powers[bug.type] = true;
+                updatePowerIndicators();
+                score += 10;
+                scoreElement.textContent = score;
+                bugs.splice(index, 1);
+                powerupSound.currentTime = 0;
+                powerupSound.play();
+
+                // Add power-up effect animation
+                const indicator = document.getElementById(`${bug.type}Power`);
+                indicator.classList.add('power-active');
+                setTimeout(() => indicator.classList.remove('power-active'), 1000);
             }
         });
 
-        volumeSlider.addEventListener('input', (e) => {
-            const volume = e.target.value / 100;
-            bgMusic.volume = volume;
-            powerupSound.volume = volume;
-            hitSound.volume = volume;
+        // Check enemy collisions
+        enemies.forEach((enemy) => {
+            if (isColliding(player, enemy)) {
+                hitSound.play();
+                gameOver();
+            }
         });
+    }
 
-        // Loading screen handler
-        let loadedAssets = 0;
-        const totalAssets = Object.keys(images).length;
+    function isColliding(rect1, rect2) {
+        return rect1.x < rect2.x + rect2.width &&
+               rect1.x + rect1.width > rect2.x &&
+               rect1.y < rect2.y + rect2.height &&
+               rect1.y + rect1.height > rect2.y;
+    }
+
+    function updatePowerIndicators() {
+        Object.keys(powers).forEach(power => {
+            const indicator = document.getElementById(`${power}Power`);
+            indicator.style.opacity = powers[power] ? '1' : '0.2';
+        });
+    }
+
+    function drawBackground() {
+        // Draw scrolling background
+        ctx.drawImage(images.background, backgroundX, 0, canvas.width, canvas.height);
+        ctx.drawImage(images.background, backgroundX + canvas.width, 0, canvas.width, canvas.height);
+    }
+
+    function drawPlayer() {
+        ctx.save();
         
-        function assetLoaded() {
-            loadedAssets++;
-            if (loadedAssets >= totalAssets) {
-                document.getElementById('loadingScreen').style.display = 'none';
-            }
-        }
-
-        // Load all images
-        Object.values(images).forEach(img => {
-            img.onload = assetLoaded;
-            img.onerror = assetLoaded; // Handle failed loads
-        });
-
-        // Enhanced drawing functions
-        function drawBackground() {
-            // Create desert background pattern
-            const pattern = ctx.createPattern(images.background, 'repeat');
-            ctx.fillStyle = pattern;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Add parallax effect
-            // ... (add scrolling background logic)
-        }
-
-        function drawPlayer() {
-            if (images.dragon.complete) {
-                ctx.drawImage(images.dragon, player.x, player.y, player.width, player.height);
-                
-                // Add power effect overlays
-                if (powers.fire) drawFireAura();
-                if (powers.water) drawWaterAura();
-                if (powers.earth) drawEarthAura();
-                if (powers.super) drawSuperAura();
-            }
-        }
-
-        // Power aura effects
-        function drawFireAura() {
-            ctx.save();
-            ctx.globalAlpha = 0.5;
-            ctx.fillStyle = '#FF4500';
-            drawAura();
-            ctx.restore();
-        }
-
-        function drawWaterAura() {
-            ctx.save();
-            ctx.globalAlpha = 0.5;
-            ctx.fillStyle = '#00CED1';
-            drawAura();
-            ctx.restore();
-        }
-
-        function drawEarthAura() {
-            ctx.save();
-            ctx.globalAlpha = 0.5;
-            ctx.fillStyle = '#228B22';
-            drawAura();
-            ctx.restore();
-        }
-
-        function drawSuperAura() {
-            ctx.save();
-            ctx.globalAlpha = 0.7;
-            ctx.fillStyle = '#FFD700';
-            drawAura();
-            ctx.restore();
-        }
-
-        function drawAura() {
+        // Draw power aura if any power is active
+        if (Object.values(powers).some(power => power)) {
             ctx.beginPath();
             ctx.arc(
                 player.x + player.width/2,
@@ -225,56 +484,152 @@
                 0,
                 Math.PI * 2
             );
+            
+            let gradient = ctx.createRadialGradient(
+                player.x + player.width/2,
+                player.y + player.height/2,
+                0,
+                player.x + player.width/2,
+                player.y + player.height/2,
+                player.width
+            );
+            
+            if (powers.fire) gradient.addColorStop(0, 'rgba(255, 69, 0, 0.3)');
+            if (powers.water) gradient.addColorStop(0.3, 'rgba(0, 191, 255, 0.3)');
+            if (powers.earth) gradient.addColorStop(0.6, 'rgba(34, 139, 34, 0.3)');
+            if (powers.super) gradient.addColorStop(1, 'rgba(255, 215, 0, 0.3)');
+            
+            ctx.fillStyle = gradient;
             ctx.fill();
         }
 
-        // Modify the drawGame function
-        function drawGame() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw background
-            drawBackground();
-            
-            // Draw bugs with enhanced effects
-            bugs.forEach(bug => drawBug(bug));
-            
-            // Draw enemies with enhanced effects
-            enemies.forEach(enemy => drawEnemy(enemy));
-            
-            // Draw player with power effects
-            drawPlayer();
+        // Draw bearded dragon
+        ctx.drawImage(
+            images.dragon,
+            player.frameX * player.width,
+            player.frameY * player.height,
+            player.width,
+            player.height,
+            player.x,
+            player.y,
+            player.width,
+            player.height
+        );
+        
+        ctx.restore();
+    }
+
+    function drawBug(bug) {
+        const bugImage = images[`${bug.type}Bug`];
+        ctx.drawImage(
+            bugImage,
+            bug.frameX * bug.width,
+            0,
+            bug.width,
+            bug.height,
+            bug.x,
+            bug.y,
+            bug.width,
+            bug.height
+        );
+
+        // Add glowing effect for bugs
+        ctx.save();
+        ctx.globalAlpha = 0.5 + Math.sin(Date.now() * 0.01) * 0.2;
+        ctx.beginPath();
+        ctx.arc(bug.x + bug.width/2, bug.y + bug.height/2, bug.width/2, 0, Math.PI * 2);
+        
+        let bugGlow;
+        switch(bug.type) {
+            case 'fire': bugGlow = '#FF4500'; break;
+            case 'water': bugGlow = '#00CED1'; break;
+            case 'earth': bugGlow = '#32CD32'; break;
+            case 'super': bugGlow = '#FFD700'; break;
         }
+        
+        ctx.fillStyle = bugGlow;
+        ctx.fill();
+        ctx.restore();
+    }
 
-        // Modify the start game handler
-        startButton.addEventListener('click', () => {
-            gameStarted = true;
-            startScreen.style.display = 'none';
-            resetGame();
-            gameLoop();
-            bgMusic.play(); // Start background music
-        });
+    function drawEnemy(enemy) {
+        ctx.drawImage(
+            images.worm,
+            enemy.frameX * enemy.width,
+            0,
+            enemy.width,
+            enemy.height,
+            enemy.x,
+            enemy.y,
+            enemy.width,
+            enemy.height
+        );
 
-        // Modify collision handler to add sounds
-        function checkCollisions() {
-            bugs.forEach((bug, index) => {
-                if (isColliding(player, bug)) {
-                    powers[bug.type] = true;
-                    updatePowerIndicators();
-                    score += 10;
-                    scoreElement.textContent = score;
-                    bugs.splice(index, 1);
-                    powerupSound.currentTime = 0;
-                    powerupSound.play();
-                }
-            });
+        // Add menacing effect
+        ctx.save();
+        ctx.globalAlpha = 0.3;
+        ctx.fillStyle = '#FF0000';
+        ctx.beginPath();
+        ctx.arc(enemy.x + enemy.width/2, enemy.y + enemy.height/2, 
+                enemy.width/2 + Math.sin(Date.now() * 0.01) * 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
 
-            enemies.forEach((enemy) => {
-                if (isColliding(player, enemy)) {
-                    hitSound.play();
-                    gameOver();
-                }
-            });
-        }
-    </script>
+    function drawGame() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw background
+        drawBackground();
+        
+        // Draw bugs with glow effects
+        bugs.forEach(bug => drawBug(bug));
+        
+        // Draw enemies with effects
+        enemies.forEach(enemy => drawEnemy(enemy));
+        
+        // Draw player with power aura
+        drawPlayer();
+    }
+
+    function gameLoop() {
+        if (!gameStarted) return;
+        updatePlayer();
+        updateGame();
+        drawGame();
+        requestAnimationFrame(gameLoop);
+    }
+
+    function gameOver() {
+        gameStarted = false;
+        startScreen.style.display = 'flex';
+        alert(`Game Over! Score: ${score}`);
+        resetGame();
+    }
+
+    function resetGame() {
+        score = 0;
+        scoreElement.textContent = score;
+        player.x = 50;
+        player.y = canvas.height / 2;
+        bugs = [];
+        enemies = [];
+        Object.keys(powers).forEach(power => powers[power] = false);
+        updatePowerIndicators();
+        backgroundX = 0;
+    }
+
+    // Start button click handler
+    startButton.addEventListener('click', () => {
+        gameStarted = true;
+        startScreen.style.display = 'none';
+        resetGame();
+        gameLoop();
+        bgMusic.play();
+    });
+
+    // Initialize power indicators
+    updatePowerIndicators();
+</script>
 </body>
 </html>
