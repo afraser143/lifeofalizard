@@ -1,298 +1,193 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bearded Dragon Adventure</title>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            background: linear-gradient(to bottom, #87CEEB, #E0F6FF);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-family: Arial, sans-serif;
-        }
+// Add these image loading sections at the start of your script
+const images = {
+    dragon: new Image(),
+    worm: new Image(),
+    fireBug: new Image(),
+    waterBug: new Image(),
+    earthBug: new Image(),
+    superBug: new Image()
+};
 
-        #gameCanvas {
-            border: 4px solid #4A90E2;
-            border-radius: 8px;
-            background: #FFFFFF;
-        }
+// Load all images
+images.dragon.src = 'https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/dragon.png';
+images.worm.src = 'https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/worm.png';
+images.fireBug.src = 'https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/firebug.png';
+images.waterBug.src = 'https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/waterbug.png';
+images.earthBug.src = 'https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/earthbug.png';
+images.superBug.src = 'https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/superbug.png';
 
-        #gameStats {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 10px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-
-        .power-indicator {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            margin-right: 5px;
-            border-radius: 50%;
-            border: 2px solid #333;
-        }
-
-        #firePower { background: #FF6B6B; }
-        #waterPower { background: #4DACFF; }
-        #earthPower { background: #77DD77; }
-        #superPower { background: #FFD93D; }
-
-        #startScreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        #startButton {
-            padding: 15px 30px;
-            font-size: 1.5em;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        #startButton:hover {
-            background: #45a049;
-        }
-    </style>
-</head>
-<body>
-    <div id="startScreen">
-        <h1 style="color: white; font-size: 3em; margin-bottom: 20px;">Bearded Dragon Adventure</h1>
-        <button id="startButton">Start Game</button>
-        <p style="color: white; margin-top: 20px;">Use arrow keys to move</p>
-    </div>
-
-    <div id="gameStats">
-        Score: <span id="score">0</span>
-        <br>
-        Powers:
-        <div class="power-indicator" id="firePower"></div>
-        <div class="power-indicator" id="waterPower"></div>
-        <div class="power-indicator" id="earthPower"></div>
-        <div class="power-indicator" id="superPower"></div>
-    </div>
-    <canvas id="gameCanvas" width="800" height="400"></canvas>
-
-    <script>
-        // Get DOM elements
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const scoreElement = document.getElementById('score');
-        const startScreen = document.getElementById('startScreen');
-        const startButton = document.getElementById('startButton');
-
-        // Game state
-        let gameStarted = false;
-        let score = 0;
-        let powers = {
-            fire: false,
-            water: false,
-            earth: false,
-            super: false
-        };
-
-        // Player (Bearded Dragon)
-        const player = {
-            x: 50,
-            y: canvas.height / 2,
-            width: 40,
-            height: 40,
-            speed: 5,
-            color: '#8B4513' // Brown color for bearded dragon
-        };
-
-        // Game objects arrays
-        let bugs = [];
-        let enemies = [];
-
-        // Controls
-        const keys = {};
-        document.addEventListener('keydown', (e) => keys[e.key] = true);
-        document.addEventListener('keyup', (e) => keys[e.key] = false);
-
-        function updatePlayer() {
-            if (keys['ArrowUp'] && player.y > 0) player.y -= player.speed;
-            if (keys['ArrowDown'] && player.y < canvas.height - player.height) player.y += player.speed;
-            if (keys['ArrowLeft'] && player.x > 0) player.x -= player.speed;
-            if (keys['ArrowRight'] && player.x < canvas.width - player.width) player.x += player.speed;
-        }
-
-        function drawPlayer() {
-            ctx.fillStyle = player.color;
-            ctx.fillRect(player.x, player.y, player.width, player.height);
-            
-            // Draw spikes (beard)
-            ctx.fillStyle = '#A52A2A';
+// Modified drawing functions
+function drawPlayer() {
+    // If using images
+    if (images.dragon.complete) {
+        ctx.drawImage(images.dragon, player.x, player.y, player.width, player.height);
+    } else {
+        // Fallback to enhanced drawn version
+        // Body
+        ctx.fillStyle = '#D2691E'; // More vibrant brown
+        ctx.fillRect(player.x, player.y, player.width, player.height);
+        
+        // Eyes
+        ctx.fillStyle = 'black';
+        ctx.beginPath();
+        ctx.arc(player.x + player.width * 0.8, player.y + player.height * 0.3, 3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Beard
+        ctx.fillStyle = '#8B4513';
+        for(let i = 0; i < 5; i++) {
             ctx.beginPath();
-            ctx.moveTo(player.x + player.width, player.y + player.height/4);
-            ctx.lineTo(player.x + player.width + 10, player.y + player.height/2);
-            ctx.lineTo(player.x + player.width, player.y + player.height*3/4);
+            ctx.moveTo(player.x + player.width, player.y + player.height * (0.3 + i * 0.1));
+            ctx.lineTo(player.x + player.width + 10, player.y + player.height * (0.35 + i * 0.1));
+            ctx.lineTo(player.x + player.width, player.y + player.height * (0.4 + i * 0.1));
             ctx.fill();
         }
-
-        function spawnBug() {
-            const types = ['fire', 'water', 'earth', 'super'];
-            const colors = {
-                fire: '#FF0000',
-                water: '#0000FF',
-                earth: '#008000',
-                super: '#FFD700'
-            };
-            
-            const type = types[Math.floor(Math.random() * types.length)];
-            bugs.push({
-                x: canvas.width,
-                y: Math.random() * (canvas.height - 20),
-                width: 20,
-                height: 20,
-                type: type,
-                color: colors[type]
-            });
+        
+        // Scales
+        ctx.fillStyle = '#A0522D';
+        for(let i = 0; i < 3; i++) {
+            for(let j = 0; j < 3; j++) {
+                ctx.beginPath();
+                ctx.arc(
+                    player.x + player.width * (0.3 + i * 0.25),
+                    player.y + player.height * (0.3 + j * 0.25),
+                    2,
+                    0,
+                    Math.PI * 2
+                );
+                ctx.fill();
+            }
         }
+    }
+}
 
-        function spawnEnemy() {
-            enemies.push({
-                x: canvas.width,
-                y: Math.random() * (canvas.height - 30),
-                width: 30,
-                height: 30,
-                speed: 3,
-                color: '#FF4444'
-            });
+function drawBug(bug) {
+    const bugImage = images[`${bug.type}Bug`];
+    if (bugImage.complete) {
+        ctx.drawImage(bugImage, bug.x, bug.y, bug.width, bug.height);
+    } else {
+        // Enhanced fallback bug drawing
+        ctx.fillStyle = bug.color;
+        
+        // Body
+        ctx.beginPath();
+        ctx.ellipse(
+            bug.x + bug.width/2,
+            bug.y + bug.height/2,
+            bug.width/2,
+            bug.height/3,
+            0,
+            0,
+            Math.PI * 2
+        );
+        ctx.fill();
+        
+        // Wings or special features based on type
+        switch(bug.type) {
+            case 'fire':
+                drawFireEffect(bug);
+                break;
+            case 'water':
+                drawWaterEffect(bug);
+                break;
+            case 'earth':
+                drawEarthEffect(bug);
+                break;
+            case 'super':
+                drawSuperEffect(bug);
+                break;
         }
+    }
+}
 
-        function updateGame() {
-            // Update bugs
-            bugs = bugs.filter(bug => {
-                bug.x -= 2;
-                return bug.x > -bug.width;
-            });
-
-            // Update enemies
-            enemies = enemies.filter(enemy => {
-                enemy.x -= enemy.speed;
-                return enemy.x > -enemy.width;
-            });
-
-            // Spawn new objects
-            if (Math.random() < 0.02) spawnBug();
-            if (Math.random() < 0.01) spawnEnemy();
-
-            // Check collisions
-            checkCollisions();
+function drawEnemy(enemy) {
+    if (images.worm.complete) {
+        ctx.drawImage(images.worm, enemy.x, enemy.y, enemy.width, enemy.height);
+    } else {
+        // Enhanced worm drawing
+        ctx.fillStyle = '#FF6B6B';
+        
+        // Segmented body
+        for(let i = 0; i < 3; i++) {
+            ctx.beginPath();
+            ctx.arc(
+                enemy.x + enemy.width * (0.3 + i * 0.25),
+                enemy.y + enemy.height/2,
+                enemy.height/3,
+                0,
+                Math.PI * 2
+            );
+            ctx.fill();
         }
+        
+        // Evil eyes
+        ctx.fillStyle = 'black';
+        ctx.beginPath();
+        ctx.arc(enemy.x + enemy.width * 0.8, enemy.y + enemy.height * 0.3, 3, 0, Math.PI * 2);
+        ctx.arc(enemy.x + enemy.width * 0.8, enemy.y + enemy.height * 0.7, 3, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
 
-        function checkCollisions() {
-            // Check bug collisions
-            bugs.forEach((bug, index) => {
-                if (isColliding(player, bug)) {
-                    powers[bug.type] = true;
-                    updatePowerIndicators();
-                    score += 10;
-                    scoreElement.textContent = score;
-                    bugs.splice(index, 1);
-                }
-            });
+// Add these helper functions for bug effects
+function drawFireEffect(bug) {
+    ctx.fillStyle = '#FFD700';
+    for(let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(bug.x + bug.width/2, bug.y);
+        ctx.lineTo(bug.x + bug.width * (0.2 + i * 0.3), bug.y - 5);
+        ctx.lineTo(bug.x + bug.width * (0.3 + i * 0.3), bug.y);
+        ctx.fill();
+    }
+}
 
-            // Check enemy collisions
-            enemies.forEach((enemy) => {
-                if (isColliding(player, enemy)) {
-                    gameOver();
-                }
-            });
-        }
+function drawWaterEffect(bug) {
+    ctx.fillStyle = '#87CEEB';
+    ctx.beginPath();
+    ctx.arc(bug.x + bug.width/2, bug.y + bug.height/2, bug.width/3, 0, Math.PI * 2);
+    ctx.fill();
+}
 
-        function isColliding(rect1, rect2) {
-            return rect1.x < rect2.x + rect2.width &&
-                   rect1.x + rect1.width > rect2.x &&
-                   rect1.y < rect2.y + rect2.height &&
-                   rect1.y + rect1.height > rect2.y;
-        }
+function drawEarthEffect(bug) {
+    ctx.fillStyle = '#8B4513';
+    for(let i = 0; i < 4; i++) {
+        ctx.fillRect(
+            bug.x + bug.width * (0.2 + i * 0.2),
+            bug.y + bug.height * 0.8,
+            3,
+            3
+        );
+    }
+}
 
-        function updatePowerIndicators() {
-            Object.keys(powers).forEach(power => {
-                const indicator = document.getElementById(`${power}Power`);
-                indicator.style.opacity = powers[power] ? '1' : '0.2';
-            });
-        }
+function drawSuperEffect(bug) {
+    ctx.fillStyle = '#FFD700';
+    for(let i = 0; i < 5; i++) {
+        const angle = (i * 72) * Math.PI / 180;
+        ctx.beginPath();
+        ctx.moveTo(bug.x + bug.width/2, bug.y + bug.height/2);
+        ctx.lineTo(
+            bug.x + bug.width/2 + Math.cos(angle) * bug.width/2,
+            bug.y + bug.height/2 + Math.sin(angle) * bug.height/2
+        );
+        ctx.lineTo(
+            bug.x + bug.width/2 + Math.cos(angle + 0.5) * bug.width/3,
+            bug.y + bug.height/2 + Math.sin(angle + 0.5) * bug.height/3
+        );
+        ctx.fill();
+    }
+}
 
-        function drawGame() {
-            // Clear canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw player
-            drawPlayer();
-
-            // Draw bugs
-            bugs.forEach(bug => {
-                ctx.fillStyle = bug.color;
-                ctx.fillRect(bug.x, bug.y, bug.width, bug.height);
-            });
-
-            // Draw enemies
-            enemies.forEach(enemy => {
-                ctx.fillStyle = enemy.color;
-                ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
-            });
-        }
-
-        function gameLoop() {
-            if (!gameStarted) return;
-            updatePlayer();
-            updateGame();
-            drawGame();
-            requestAnimationFrame(gameLoop);
-        }
-
-        function gameOver() {
-            gameStarted = false;
-            startScreen.style.display = 'flex';
-            alert(`Game Over! Score: ${score}`);
-            resetGame();
-        }
-
-        function resetGame() {
-            score = 0;
-            scoreElement.textContent = score;
-            player.x = 50;
-            player.y = canvas.height / 2;
-            bugs = [];
-            enemies = [];
-            Object.keys(powers).forEach(power => powers[power] = false);
-            updatePowerIndicators();
-        }
-
-        // Start button click handler
-        startButton.addEventListener('click', () => {
-            gameStarted = true;
-            startScreen.style.display = 'none';
-            resetGame();
-            gameLoop();
-        });
-
-        // Initialize power indicators
-        updatePowerIndicators();
-    </script>
-</body>
-</html>
+// Modify the drawGame function to use these new drawing functions
+function drawGame() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw bugs
+    bugs.forEach(bug => drawBug(bug));
+    
+    // Draw enemies
+    enemies.forEach(enemy => drawEnemy(enemy));
+    
+    // Draw player
+    drawPlayer();
+}
