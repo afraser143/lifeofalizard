@@ -419,12 +419,13 @@
 
 <script>
     // Get DOM elements
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
+    const gameArea = document.getElementById('gameArea');
+    const player = document.getElementById('player');
+    const bugsContainer = document.getElementById('bugs-container');
+    const enemiesContainer = document.getElementById('enemies-container');
     const scoreElement = document.getElementById('score');
     const startScreen = document.getElementById('startScreen');
     const startButton = document.getElementById('startButton');
-    const loadingScreen = document.getElementById('loadingScreen');
 
     // Audio setup
     const bgMusic = document.getElementById('backgroundMusic');
@@ -433,30 +434,9 @@
     const musicToggle = document.getElementById('musicToggle');
     const volumeSlider = document.getElementById('volumeSlider');
 
-    // Image loading
-    const images = {
-        background: new Image(),
-        dragon: new Image(),
-        worm: new Image(),
-        fireBug: new Image(),
-        waterBug: new Image(),
-        earthBug: new Image(),
-        superBug: new Image()
-    };
-
-    // Set image sources
-    images.background.src = 'https://commons.wikimedia.org/wiki/File:Rub_al_Khali_002.JPG';
-    images.dragon.src = 'https://commons.wikimedia.org/wiki/File:Pvitticeps.JPG';
-    images.worm.src = 'https://commons.wikimedia.org/wiki/File:Worm_heraldic.svg';
-    images.fireBug.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Insect_icon_red.png/640px-Insect_icon_red.png';
-    images.waterBug.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Insect_icon_blue.png/640px-Insect_icon_blue.png';
-    images.earthBug.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Insect_icon_green.png/640px-Insect_icon_green.png';
-    images.superBug.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Insect_icon_gold.png/640px-Insect_icon_gold.png';
-
     // Game state
     let gameStarted = false;
     let score = 0;
-    let backgroundX = 0;
     let powers = {
         fire: false,
         water: false,
@@ -464,18 +444,13 @@
         super: false
     };
 
-    // Player (Bearded Dragon)
-    const player = {
+    // Player properties
+    const playerState = {
         x: 50,
-        y: canvas.height / 2,
+        y: gameArea.clientHeight / 2,
         width: 60,
         height: 40,
-        speed: 5,
-        frameX: 0,
-        frameY: 0,
-        frameCount: 4,
-        animationSpeed: 5,
-        animationCounter: 0
+        speed: 5
     };
 
     // Game objects arrays
@@ -486,10 +461,6 @@
     const keys = {};
     document.addEventListener('keydown', (e) => keys[e.key] = true);
     document.addEventListener('keyup', (e) => keys[e.key] = false);
-
-    // Asset loading tracker
-    let loadedAssets = 0;
-    const totalAssets = Object.keys(images).length;
 
     // Audio controls
     musicToggle.addEventListener('click', () => {
@@ -509,90 +480,86 @@
         hitSound.volume = volume;
     });
 
-        function assetLoaded() {
-        loadedAssets++;
-        if (loadedAssets >= totalAssets) {
-            loadingScreen.style.display = 'none';
-        }
+    function updatePlayer() {
+        if (keys['ArrowUp'] && playerState.y > 0) playerState.y -= playerState.speed;
+        if (keys['ArrowDown'] && playerState.y < gameArea.clientHeight - playerState.height) 
+            playerState.y += playerState.speed;
+        if (keys['ArrowLeft'] && playerState.x > 0) playerState.x -= playerState.speed;
+        if (keys['ArrowRight'] && playerState.x < gameArea.clientWidth - playerState.width) 
+            playerState.x += playerState.speed;
+
+        player.style.transform = `translate(${playerState.x}px, ${playerState.y}px)`;
     }
 
-    // Load all images
-    Object.values(images).forEach(img => {
-        img.onload = assetLoaded;
-        img.onerror = () => {
-            console.error('Error loading image:', img.src);
-            assetLoaded(); // Continue even if image fails
-        };
-    });
-
-    function updatePlayer() {
-        if (keys['ArrowUp'] && player.y > 0) player.y -= player.speed;
-        if (keys['ArrowDown'] && player.y < canvas.height - player.height) player.y += player.speed;
-        if (keys['ArrowLeft'] && player.x > 0) player.x -= player.speed;
-        if (keys['ArrowRight'] && player.x < canvas.width - player.width) player.x += player.speed;
-
-        // Update animation frame
-        player.animationCounter++;
-        if (player.animationCounter >= player.animationSpeed) {
-            player.frameX = (player.frameX + 1) % player.frameCount;
-            player.animationCounter = 0;
-        }
+    function createBugElement(type) {
+        const bug = document.createElement('div');
+        bug.className = `bug ${type}-bug`;
+        return bug;
     }
 
     function spawnBug() {
         const types = ['fire', 'water', 'earth', 'super'];
         const type = types[Math.floor(Math.random() * types.length)];
-        bugs.push({
-            x: canvas.width,
-            y: Math.random() * (canvas.height - 30),
+        const bugElement = createBugElement(type);
+        
+        const bug = {
+            element: bugElement,
+            x: gameArea.clientWidth,
+            y: Math.random() * (gameArea.clientHeight - 30),
             width: 30,
             height: 30,
-            type: type,
-            frameX: 0,
-            frameCount: 4,
-            animationSpeed: 8,
-            animationCounter: 0
-        });
+            type: type
+        };
+
+        bugElement.style.transform = `translate(${bug.x}px, ${bug.y}px)`;
+        bugsContainer.appendChild(bugElement);
+        bugs.push(bug);
+    }
+
+    function createWormElement() {
+        const worm = document.createElement('div');
+        worm.className = 'evil-worm';
+        return worm;
     }
 
     function spawnEnemy() {
-        enemies.push({
-            x: canvas.width,
-            y: Math.random() * (canvas.height - 40),
+        const wormElement = createWormElement();
+        
+        const enemy = {
+            element: wormElement,
+            x: gameArea.clientWidth,
+            y: Math.random() * (gameArea.clientHeight - 30),
             width: 40,
-            height: 30,
-            speed: 3,
-            frameX: 0,
-            frameCount: 4,
-            animationSpeed: 6,
-            animationCounter: 0
-        });
+            height: 25,
+            speed: 3
+        };
+
+        wormElement.style.transform = `translate(${enemy.x}px, ${enemy.y}px)`;
+        enemiesContainer.appendChild(wormElement);
+        enemies.push(enemy);
     }
 
     function updateGame() {
-        // Scroll background
-        backgroundX = (backgroundX - 1) % canvas.width;
-
         // Update bugs
         bugs = bugs.filter(bug => {
             bug.x -= 2;
-            bug.animationCounter++;
-            if (bug.animationCounter >= bug.animationSpeed) {
-                bug.frameX = (bug.frameX + 1) % bug.frameCount;
-                bug.animationCounter = 0;
+            bug.element.style.transform = `translate(${bug.x}px, ${bug.y}px)`;
+            if (bug.x < -bug.width) {
+                bugsContainer.removeChild(bug.element);
+                return false;
             }
-            return bug.x > -bug.width;
+            return true;
         });
 
         // Update enemies
         enemies = enemies.filter(enemy => {
             enemy.x -= enemy.speed;
-            enemy.animationCounter++;
-            if (enemy.animationCounter >= enemy.animationSpeed) {
-                enemy.frameX = (enemy.frameX + 1) % enemy.frameCount;
-                enemy.animationCounter = 0;
+            enemy.element.style.transform = `translate(${enemy.x}px, ${enemy.y}px)`;
+            if (enemy.x < -enemy.width) {
+                enemiesContainer.removeChild(enemy.element);
+                return false;
             }
-            return enemy.x > -enemy.width;
+            return true;
         });
 
         // Spawn new objects
@@ -602,37 +569,44 @@
         checkCollisions();
     }
 
+    function isColliding(rect1, rect2) {
+        return rect1.x < rect2.x + rect2.width &&
+               rect1.x + rect1.width > rect2.x &&
+               rect1.y < rect2.y + rect2.height &&
+               rect1.y + rect1.height > rect2.y;
+    }
+
     function checkCollisions() {
+        const playerRect = {
+            x: playerState.x,
+            y: playerState.y,
+            width: playerState.width,
+            height: playerState.height
+        };
+
         bugs.forEach((bug, index) => {
-            if (isColliding(player, bug)) {
+            if (isColliding(playerRect, bug)) {
                 powers[bug.type] = true;
                 updatePowerIndicators();
                 score += 10;
                 scoreElement.textContent = score;
+                bugsContainer.removeChild(bug.element);
                 bugs.splice(index, 1);
                 powerupSound.currentTime = 0;
                 powerupSound.play();
 
-                // Add power-up effect animation
                 const indicator = document.getElementById(`${bug.type}Power`);
                 indicator.classList.add('power-active');
                 setTimeout(() => indicator.classList.remove('power-active'), 1000);
             }
         });
 
-        enemies.forEach((enemy) => {
-            if (isColliding(player, enemy)) {
+        enemies.forEach((enemy, index) => {
+            if (isColliding(playerRect, enemy)) {
                 hitSound.play();
                 gameOver();
             }
         });
-    }
-
-    function isColliding(rect1, rect2) {
-        return rect1.x < rect2.x + rect2.width &&
-               rect1.x + rect1.width > rect2.x &&
-               rect1.y < rect2.y + rect2.height &&
-               rect1.y + rect1.height > rect2.y;
     }
 
     function updatePowerIndicators() {
@@ -642,107 +616,10 @@
         });
     }
 
-    function drawBackground() {
-        ctx.drawImage(images.background, backgroundX, 0, canvas.width, canvas.height);
-        ctx.drawImage(images.background, backgroundX + canvas.width, 0, canvas.width, canvas.height);
-    }
-
-    function drawPlayer() {
-        ctx.save();
-        
-        // Draw power aura if any power is active
-        if (Object.values(powers).some(power => power)) {
-            ctx.beginPath();
-            ctx.arc(
-                player.x + player.width/2,
-                player.y + player.height/2,
-                player.width * 0.8,
-                0,
-                Math.PI * 2
-            );
-            
-            let gradient = ctx.createRadialGradient(
-                player.x + player.width/2,
-                player.y + player.height/2,
-                0,
-                player.x + player.width/2,
-                player.y + player.height/2,
-                player.width
-            );
-            
-            if (powers.fire) gradient.addColorStop(0, 'rgba(255, 69, 0, 0.3)');
-            if (powers.water) gradient.addColorStop(0.3, 'rgba(0, 191, 255, 0.3)');
-            if (powers.earth) gradient.addColorStop(0.6, 'rgba(34, 139, 34, 0.3)');
-            if (powers.super) gradient.addColorStop(1, 'rgba(255, 215, 0, 0.3)');
-            
-            ctx.fillStyle = gradient;
-            ctx.fill();
-        }
-
-        // Draw bearded dragon with temporary rectangle if image isn't loaded
-        if (images.dragon.complete) {
-            ctx.drawImage(images.dragon, player.x, player.y, player.width, player.height);
-        } else {
-            ctx.fillStyle = '#8B4513';
-            ctx.fillRect(player.x, player.y, player.width, player.height);
-        }
-        
-        ctx.restore();
-    }
-
-    function drawBug(bug) {
-        ctx.save();
-        
-        // Draw bug with glow effect
-        ctx.shadowColor = bug.type === 'fire' ? '#FF4500' :
-                         bug.type === 'water' ? '#00CED1' :
-                         bug.type === 'earth' ? '#32CD32' : '#FFD700';
-        ctx.shadowBlur = 10;
-        
-        // Draw temporary circle if image isn't loaded
-        if (images[`${bug.type}Bug`].complete) {
-            ctx.drawImage(images[`${bug.type}Bug`], bug.x, bug.y, bug.width, bug.height);
-        } else {
-            ctx.beginPath();
-            ctx.arc(bug.x + bug.width/2, bug.y + bug.height/2, bug.width/2, 0, Math.PI * 2);
-            ctx.fillStyle = ctx.shadowColor;
-            ctx.fill();
-        }
-        
-        ctx.restore();
-    }
-
-    function drawEnemy(enemy) {
-        ctx.save();
-        
-        // Draw enemy with red glow
-        ctx.shadowColor = '#FF0000';
-        ctx.shadowBlur = 10;
-        
-        // Draw temporary rectangle if image isn't loaded
-        if (images.worm.complete) {
-            ctx.drawImage(images.worm, enemy.x, enemy.y, enemy.width, enemy.height);
-        } else {
-            ctx.fillStyle = '#FF4444';
-            ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
-        }
-        
-        ctx.restore();
-    }
-
-    function drawGame() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawBackground();
-        bugs.forEach(drawBug);
-        enemies.forEach(drawEnemy);
-        drawPlayer();
-    }
-
     function gameLoop() {
         if (!gameStarted) return;
         updatePlayer();
         updateGame();
-        drawGame();
         requestAnimationFrame(gameLoop);
     }
 
@@ -756,13 +633,18 @@
     function resetGame() {
         score = 0;
         scoreElement.textContent = score;
-        player.x = 50;
-        player.y = canvas.height / 2;
+        playerState.x = 50;
+        playerState.y = gameArea.clientHeight / 2;
+        player.style.transform = `translate(${playerState.x}px, ${playerState.y}px)`;
+        
+        // Clear all bugs and enemies
+        bugsContainer.innerHTML = '';
+        enemiesContainer.innerHTML = '';
         bugs = [];
         enemies = [];
+        
         Object.keys(powers).forEach(power => powers[power] = false);
         updatePowerIndicators();
-        backgroundX = 0;
     }
 
     // Start button click handler
