@@ -180,7 +180,180 @@
             font-size: 24px;
             text-align: center;
         }
+        /* Add these new styles to your existing CSS */
 
+/* Player (Bearded Dragon) */
+.bearded-dragon {
+    width: 60px;
+    height: 40px;
+    background: linear-gradient(45deg, #8B4513, #A0522D);
+    position: absolute;
+    border-radius: 20px;
+    transform-origin: center;
+    transition: transform 0.1s;
+}
+
+.bearded-dragon::before {  /* Head */
+    content: '';
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    background: linear-gradient(45deg, #A0522D, #8B4513);
+    right: -10px;
+    top: 8px;
+    border-radius: 50%;
+}
+
+.bearded-dragon::after {  /* Beard */
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: #8B4513;
+    right: -18px;
+    top: 10px;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+
+/* Bugs */
+.bug {
+    width: 30px;
+    height: 30px;
+    position: absolute;
+    border-radius: 50%;
+    transition: transform 0.2s;
+}
+
+.bug::before,
+.bug::after {  /* Wings */
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 15px;
+    background: inherit;
+    border-radius: 50%;
+    opacity: 0.7;
+}
+
+.bug::before {
+    top: -5px;
+    left: -5px;
+    transform: rotate(-45deg);
+}
+
+.bug::after {
+    top: -5px;
+    right: -5px;
+    transform: rotate(45deg);
+}
+
+.fire-bug {
+    background: radial-gradient(circle at 30% 30%, #FF4500, #FF0000);
+    box-shadow: 0 0 15px #FF6347;
+    animation: glow-fire 1s infinite alternate;
+}
+
+.water-bug {
+    background: radial-gradient(circle at 30% 30%, #00BFFF, #0000FF);
+    box-shadow: 0 0 15px #87CEEB;
+    animation: glow-water 1s infinite alternate;
+}
+
+.earth-bug {
+    background: radial-gradient(circle at 30% 30%, #32CD32, #006400);
+    box-shadow: 0 0 15px #90EE90;
+    animation: glow-earth 1s infinite alternate;
+}
+
+.super-bug {
+    background: radial-gradient(circle at 30% 30%, #FFD700, #FFA500);
+    box-shadow: 0 0 20px #FFD700;
+    animation: glow-super 1.5s infinite alternate;
+}
+
+/* Evil Worm */
+.evil-worm {
+    width: 40px;
+    height: 25px;
+    background: linear-gradient(45deg, #FF4444, #FF0000);
+    border-radius: 20px;
+    position: absolute;
+    animation: wiggle 0.5s infinite alternate;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+}
+
+.evil-worm::before,
+.evil-worm::after {  /* Eyes */
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: black;
+    border-radius: 50%;
+    top: 5px;
+}
+
+.evil-worm::before { left: 8px; }
+.evil-worm::after { left: 22px; }
+
+/* Animations */
+@keyframes wiggle {
+    from { transform: translateY(0); }
+    to { transform: translateY(3px); }
+}
+
+@keyframes glow-fire {
+    from { box-shadow: 0 0 15px #FF6347; }
+    to { box-shadow: 0 0 25px #FF4500; }
+}
+
+@keyframes glow-water {
+    from { box-shadow: 0 0 15px #87CEEB; }
+    to { box-shadow: 0 0 25px #00BFFF; }
+}
+
+@keyframes glow-earth {
+    from { box-shadow: 0 0 15px #90EE90; }
+    to { box-shadow: 0 0 25px #32CD32; }
+}
+
+@keyframes glow-super {
+    from { box-shadow: 0 0 20px #FFD700; }
+    to { box-shadow: 0 0 30px #FFA500; }
+}
+
+/* Power auras */
+.power-aura {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0.4;
+    animation: pulse 1.5s infinite alternate;
+}
+
+@keyframes pulse {
+    from { transform: scale(1); opacity: 0.4; }
+    to { transform: scale(1.1); opacity: 0.6; }
+}
+
+/* Desert background */
+.desert-background {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, #87CEEB 0%, #E6B980 60%, #EAC5A3 100%);
+    overflow: hidden;
+}
+
+.desert-background::before {  /* Sand dunes */
+    content: '';
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 40%;
+    background: linear-gradient(180deg, #E6B980 0%, #EAC5A3 100%);
+    border-radius: 50% 50% 0 0;
+}
         .loading-spinner {
             width: 50px;
             height: 50px;
