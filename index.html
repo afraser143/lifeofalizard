@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bearded Dragon Adventure</title>
+    <title>Life of a Lizard</title>
     <style>
         body {
             margin: 0;
@@ -47,6 +47,7 @@
             border-radius: 50%;
             border: 2px solid #333;
             transition: all 0.3s ease;
+            opacity: 0.2;
         }
 
         #firePower { 
@@ -69,6 +70,7 @@
         .power-active {
             animation: powerPulse 1.5s infinite;
             transform: scale(1.2);
+            opacity: 1 !important;
         }
 
         @keyframes powerPulse {
@@ -204,11 +206,15 @@
     </div>
 
     <div id="startScreen">
-        <h1 class="game-title">Bearded Dragon Adventure</h1>
+        <h1 class="game-title">Life of a Lizard</h1>
         <button id="startButton">Start Game</button>
         <div class="instructions">
             Use arrow keys to move<br>
-            Collect power bugs and avoid the evil worm!
+            Collect power bugs and avoid the evil worm!<br>
+            🔥 Fire Bug - Flame powers<br>
+            💧 Water Bug - Water shield<br>
+            🌍 Earth Bug - Ground pound<br>
+            ⭐ Super Bug - Ultimate power!
         </div>
     </div>
 
@@ -237,6 +243,7 @@
     </audio>
     <audio id="powerupSound" src="https://freesound.org/people/GameAudio/sounds/220173/download/220173__gameaudio__flourish-spacey-2.mp3"></audio>
     <audio id="hitSound" src="https://freesound.org/people/LittleRobotSoundFactory/sounds/270332/download/270332__littlerobotsoundfactory__hit-02.mp3"></audio>
+
 <script>
     // Get DOM elements
     const canvas = document.getElementById('gameCanvas');
@@ -311,22 +318,6 @@
     let loadedAssets = 0;
     const totalAssets = Object.keys(images).length;
 
-    function assetLoaded() {
-        loadedAssets++;
-        if (loadedAssets >= totalAssets) {
-            loadingScreen.style.display = 'none';
-        }
-    }
-
-    // Load all images
-    Object.values(images).forEach(img => {
-        img.onload = assetLoaded;
-        img.onerror = () => {
-            console.error('Error loading image:', img.src);
-            assetLoaded();
-        };
-    });
-
     // Audio controls
     musicToggle.addEventListener('click', () => {
         if (bgMusic.paused) {
@@ -343,6 +334,22 @@
         bgMusic.volume = volume;
         powerupSound.volume = volume;
         hitSound.volume = volume;
+    });
+
+        function assetLoaded() {
+        loadedAssets++;
+        if (loadedAssets >= totalAssets) {
+            loadingScreen.style.display = 'none';
+        }
+    }
+
+    // Load all images
+    Object.values(images).forEach(img => {
+        img.onload = assetLoaded;
+        img.onerror = () => {
+            console.error('Error loading image:', img.src);
+            assetLoaded(); // Continue even if image fails
+        };
     });
 
     function updatePlayer() {
@@ -419,12 +426,10 @@
         if (Math.random() < 0.02) spawnBug();
         if (Math.random() < 0.01) spawnEnemy();
 
-        // Check collisions
         checkCollisions();
     }
 
-        function checkCollisions() {
-        // Check bug collisions
+    function checkCollisions() {
         bugs.forEach((bug, index) => {
             if (isColliding(player, bug)) {
                 powers[bug.type] = true;
@@ -442,7 +447,6 @@
             }
         });
 
-        // Check enemy collisions
         enemies.forEach((enemy) => {
             if (isColliding(player, enemy)) {
                 hitSound.play();
@@ -466,7 +470,6 @@
     }
 
     function drawBackground() {
-        // Draw scrolling background
         ctx.drawImage(images.background, backgroundX, 0, canvas.width, canvas.height);
         ctx.drawImage(images.background, backgroundX + canvas.width, 0, canvas.width, canvas.height);
     }
@@ -503,92 +506,62 @@
             ctx.fill();
         }
 
-        // Draw bearded dragon
-        ctx.drawImage(
-            images.dragon,
-            player.frameX * player.width,
-            player.frameY * player.height,
-            player.width,
-            player.height,
-            player.x,
-            player.y,
-            player.width,
-            player.height
-        );
+        // Draw bearded dragon with temporary rectangle if image isn't loaded
+        if (images.dragon.complete) {
+            ctx.drawImage(images.dragon, player.x, player.y, player.width, player.height);
+        } else {
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+        }
         
         ctx.restore();
     }
 
     function drawBug(bug) {
-        const bugImage = images[`${bug.type}Bug`];
-        ctx.drawImage(
-            bugImage,
-            bug.frameX * bug.width,
-            0,
-            bug.width,
-            bug.height,
-            bug.x,
-            bug.y,
-            bug.width,
-            bug.height
-        );
-
-        // Add glowing effect for bugs
         ctx.save();
-        ctx.globalAlpha = 0.5 + Math.sin(Date.now() * 0.01) * 0.2;
-        ctx.beginPath();
-        ctx.arc(bug.x + bug.width/2, bug.y + bug.height/2, bug.width/2, 0, Math.PI * 2);
         
-        let bugGlow;
-        switch(bug.type) {
-            case 'fire': bugGlow = '#FF4500'; break;
-            case 'water': bugGlow = '#00CED1'; break;
-            case 'earth': bugGlow = '#32CD32'; break;
-            case 'super': bugGlow = '#FFD700'; break;
+        // Draw bug with glow effect
+        ctx.shadowColor = bug.type === 'fire' ? '#FF4500' :
+                         bug.type === 'water' ? '#00CED1' :
+                         bug.type === 'earth' ? '#32CD32' : '#FFD700';
+        ctx.shadowBlur = 10;
+        
+        // Draw temporary circle if image isn't loaded
+        if (images[`${bug.type}Bug`].complete) {
+            ctx.drawImage(images[`${bug.type}Bug`], bug.x, bug.y, bug.width, bug.height);
+        } else {
+            ctx.beginPath();
+            ctx.arc(bug.x + bug.width/2, bug.y + bug.height/2, bug.width/2, 0, Math.PI * 2);
+            ctx.fillStyle = ctx.shadowColor;
+            ctx.fill();
         }
         
-        ctx.fillStyle = bugGlow;
-        ctx.fill();
         ctx.restore();
     }
 
     function drawEnemy(enemy) {
-        ctx.drawImage(
-            images.worm,
-            enemy.frameX * enemy.width,
-            0,
-            enemy.width,
-            enemy.height,
-            enemy.x,
-            enemy.y,
-            enemy.width,
-            enemy.height
-        );
-
-        // Add menacing effect
         ctx.save();
-        ctx.globalAlpha = 0.3;
-        ctx.fillStyle = '#FF0000';
-        ctx.beginPath();
-        ctx.arc(enemy.x + enemy.width/2, enemy.y + enemy.height/2, 
-                enemy.width/2 + Math.sin(Date.now() * 0.01) * 5, 0, Math.PI * 2);
-        ctx.fill();
+        
+        // Draw enemy with red glow
+        ctx.shadowColor = '#FF0000';
+        ctx.shadowBlur = 10;
+        
+        // Draw temporary rectangle if image isn't loaded
+        if (images.worm.complete) {
+            ctx.drawImage(images.worm, enemy.x, enemy.y, enemy.width, enemy.height);
+        } else {
+            ctx.fillStyle = '#FF4444';
+            ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+        }
+        
         ctx.restore();
     }
 
     function drawGame() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Draw background
         drawBackground();
-        
-        // Draw bugs with glow effects
-        bugs.forEach(bug => drawBug(bug));
-        
-        // Draw enemies with effects
-        enemies.forEach(enemy => drawEnemy(enemy));
-        
-        // Draw player with power aura
+        bugs.forEach(drawBug);
+        enemies.forEach(drawEnemy);
         drawPlayer();
     }
 
@@ -625,7 +598,9 @@
         startScreen.style.display = 'none';
         resetGame();
         gameLoop();
-        bgMusic.play();
+        bgMusic.play().catch(() => {
+            console.log('Audio playback failed; probably needs user interaction first');
+        });
     });
 
     // Initialize power indicators
